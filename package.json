@@ -1,0 +1,20 @@
+{
+  "name": "synstation-staking-contracts",
+  "license": "MIT",
+  "author": {
+    "name": "Noah",
+    "email": "xoopp5818@gmail.com"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.7",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "v4.9.6",
+    "@openzeppelin/contracts-upgradeable": "v4.9.6",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "hardhat-deploy": "^0.12.4",
+    "hardhat-deploy-ethers": "^0.4.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}
