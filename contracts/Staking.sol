@@ -6,31 +6,11 @@ import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-interface ILido is IERC20 {
-    function submit(address user) external payable returns (uint256 stETHAmount);
-}
-
-interface IWstETH is IERC20 {
-    function wrap(uint256 _stETHAmount) external returns (uint256 _wstETHAmount);
-    function unwrap(uint256 _wstETHAmount) external returns (uint256 _stETHAmount);
-    function getStETHByWstETH(uint256 _wstETHAmount) external view returns (uint256);
-    function getWstETHByStETH(uint256 _stETHAmount) external view returns (uint256);
-}
-
-interface IDepositNFT {
-    function safeMint(address to, address token, uint256 amount, address wrappedToken, uint256 wrappedAmount)
-        external;
-    function getTokenIds(address user) external view returns (uint256[] memory);
-    function getDepositInfo(uint256 tokenId)
-        external
-        view
-        returns (address depositToken, uint256 amount, address wrappedToken, uint256 wrappedAmount);
-}
-
-interface IOGNFT {
-    function safeMint(address to) external;
-    function ogMintAvailable(address to, uint256 commitment) external view returns (bool);
-}
+import {IDepositNFT} from "./interfaces/IDepositNFT.sol";
+import {IWstETH} from "./interfaces/IWstETH.sol";
+import {ILido} from "./interfaces/ILido.sol";
+import {IOGNFT} from "./interfaces/IOGNFT.sol";
+import {IMellowVault} from "./interfaces/IMellowVault.sol";
 
 /// @title Staking.sol
 /// @author Synstation
@@ -61,6 +41,8 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
 
     bool public withdrawalEnabled;
     uint256 EMERGENCY_WITHDRAW_TIMESTAMP = 1742660852;
+
+    IMellowVault public mellowVault;
 
     error DepositNotAllowed();
     error DepositNFTNotSet();
@@ -96,6 +78,12 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
      */
     function unpause() external onlyOwner {
         _unpause();
+    }
+
+    function setMellowVault(address _mellowVault) external onlyOwner {
+        mellowVault = IMellowVault(_mellowVault);
+
+        IERC20(address(WSTETH)).safeApprove(_mellowVault, type(uint256).max);
     }
 
     /**
@@ -219,6 +207,8 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
 
             emit Staked(msg.sender, token, amount, token, tokenAmt);
         }
+
+        // if wrapped Token is wstETH, deposit to mellow
     }
 
     function _depositETH(uint256 amount) internal {
@@ -255,7 +245,7 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
             uint256 stAmount = WSTETH.unwrap(user.wrappedAmount);
 
             user.wrappedAmount = 0;
-            STETH.transfer(msg.sender, stAmount);
+            IERC20(address(STETH)).safeTransfer(msg.sender, stAmount);
         } else {
             uint256 returnAmount = user.wrappedAmount;
             user.wrappedAmount = 0;
@@ -292,6 +282,14 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
 
             IERC20(token).safeTransfer(msg.sender, amount);
         }
+    }
+
+    function _depositToMellow(uint256 amount) internal {
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amount;
+
+        // TODO : min, deadline, acutal amount handle, wrapped amount handle
+        mellowVault.deposit(address(this), amounts, amount * 99 / 100, block.timestamp + 60);
     }
 
     /// VIEW
