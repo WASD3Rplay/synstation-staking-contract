@@ -34,7 +34,7 @@ contract SynstationDepositWrapper {
         WSTETH = _WSTETH;
 
         IERC20(address(STETH)).safeApprove(address(WSTETH), type(uint256).max);
-        IERC20(address(WSTETH)).safeApprove(_mellowVault, type(uint256).max);
+        IERC20(address(WSTETH)).safeApprove(address(_mellowVault), type(uint256).max);
         IERC20(address(mellowVault)).safeApprove(_preStaking, type(uint256).max);
     }
 
@@ -68,7 +68,7 @@ contract SynstationDepositWrapper {
     }
 
     function _ethToStEth(uint256 _amount) internal returns (uint256) {
-        STETH.submit{value: _amount}(address(this));
+        return STETH.submit{value: _amount}(address(this));
     }
 
     function _stEthToWstEth(uint256 _amount) internal returns (uint256) {
@@ -78,7 +78,8 @@ contract SynstationDepositWrapper {
 
     function _wstEthToWant() internal returns (uint256 lpAmount) {
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = amount;
+        uint256 amount = IERC20(address(WSTETH)).balanceOf(address(this));
+        amounts[0]  = amount;
 
         (, lpAmount) = mellowVault.deposit(address(this), amounts, amount * 99 / 100, block.timestamp + 60);
     }

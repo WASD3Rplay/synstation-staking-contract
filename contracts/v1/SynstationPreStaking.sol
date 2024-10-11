@@ -39,6 +39,9 @@ contract SynstationPreStaking is AccessControlUpgradeable {
         __AccessControl_init();
 
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        _setupRole(ADMIN_ROLE, msg.sender);
+        _setupRole(LISTING_ROLE, msg.sender);
     }
 
     //VIEW FUNCTIONS

@@ -4,6 +4,7 @@ import '@nomicfoundation/hardhat-ethers';
 import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
 import * as dotenv from 'dotenv';
+import 'hardhat-gas-reporter';
 import { ethers } from 'ethers';
 dotenv.config();
 
@@ -85,6 +86,11 @@ const config = {
     deployer: {
       default: 0,
     },
+  },
+
+  gasReporter: {
+    currency: 'USD',
+    gasPrice: 4,
   },
 };
 

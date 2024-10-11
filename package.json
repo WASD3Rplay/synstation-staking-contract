@@ -16,5 +16,8 @@
     "hardhat-deploy-ethers": "^0.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "hardhat-gas-reporter": "^2.2.1"
   }
 }

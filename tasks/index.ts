@@ -4,3 +4,5 @@ import './set-lido';
 import './set-deposit-pause';
 
 import './deploy-mock-erc20';
+
+import './deploy-pre-staking';
