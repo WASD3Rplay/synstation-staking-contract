@@ -69,6 +69,11 @@ const config = {
         },
       },
     },
+    tenderly_mainnet: {
+      chainId: 1,
+      url: 'https://rpc.tenderly.co/fork/3cdaf312-a3d4-4a62-81cd-fe12dce0b431',
+      accounts: [DEPLOYER_PVT_KEY],
+    },
     klaytn: {
       chainId: 8217,
       url: 'https://klaytn.blockpi.network/v1/rpc/public',
