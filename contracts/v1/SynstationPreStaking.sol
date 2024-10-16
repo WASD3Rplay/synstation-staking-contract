@@ -27,21 +27,37 @@ contract SynstationPreStaking is AccessControlUpgradeable {
     PoolInfo[] public poolInfo;
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
 
-    event Deposit(address indexed user, uint256 indexed pid, address token, uint256 amount, address indexed to);
-    event Withdraw(address indexed user, uint256 indexed pid, address token, uint256 amount, address indexed to);
-    event AddNewPool(uint256 indexed pid, address indexed token, uint256 depositCap);
+    event Deposit(
+        address indexed user,
+        uint256 indexed pid,
+        address token,
+        uint256 amount,
+        address indexed to
+    );
+    event Withdraw(
+        address indexed user,
+        uint256 indexed pid,
+        address token,
+        uint256 amount,
+        address indexed to
+    );
+    event AddNewPool(
+        uint256 indexed pid,
+        address indexed token,
+        uint256 depositCap
+    );
     event SetDepositCap(uint256 indexed pid, uint256 depositCap);
     event SetPause(uint256 indexed pid, bool paused);
 
     constructor() {}
 
-    function initialize() external initializer {
+    function initialize(address _defaultAdmin) external initializer {
         __AccessControl_init();
 
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
 
-        _setupRole(ADMIN_ROLE, msg.sender);
-        _setupRole(LISTING_ROLE, msg.sender);
+        _setupRole(ADMIN_ROLE, _defaultAdmin);
+        _setupRole(LISTING_ROLE, _defaultAdmin);
     }
 
     //VIEW FUNCTIONS
@@ -61,7 +77,11 @@ contract SynstationPreStaking is AccessControlUpgradeable {
         if (amount > 0) {
             UserInfo storage user = userInfo[pid][to];
 
-            pool.want.safeTransferFrom(address(msg.sender), address(this), amount);
+            pool.want.safeTransferFrom(
+                address(msg.sender),
+                address(this),
+                amount
+            );
 
             user.amount = user.amount + amount;
             user.lastDepositTimestamp = block.timestamp;
@@ -94,34 +114,59 @@ contract SynstationPreStaking is AccessControlUpgradeable {
 
             pool.want.safeTransfer(to, desiredAmount);
 
-            emit Withdraw(msg.sender, pid, address(pool.want), desiredAmount, to);
+            emit Withdraw(
+                msg.sender,
+                pid,
+                address(pool.want),
+                desiredAmount,
+                to
+            );
         }
     }
 
-    function add(IERC20 _want, uint256 _depositCap) external onlyRole(LISTING_ROLE) {
-        poolInfo.push(PoolInfo({want: _want, totalDeposited: 0, depositCap: _depositCap, paused: false}));
+    function add(
+        IERC20 _want,
+        uint256 _depositCap
+    ) external onlyRole(LISTING_ROLE) {
+        poolInfo.push(
+            PoolInfo({
+                want: _want,
+                totalDeposited: 0,
+                depositCap: _depositCap,
+                paused: false
+            })
+        );
 
         emit AddNewPool(poolInfo.length - 1, address(_want), _depositCap);
     }
 
-    function setDepositCap(uint256 _pid, uint256 _depositCap) external onlyRole(LISTING_ROLE) {
+    function setDepositCap(
+        uint256 _pid,
+        uint256 _depositCap
+    ) external onlyRole(LISTING_ROLE) {
         poolInfo[_pid].depositCap = _depositCap;
 
         emit SetDepositCap(_pid, _depositCap);
     }
 
-    function setPause(uint256 _pid, bool _paused) external onlyRole(ADMIN_ROLE) {
+    function setPause(
+        uint256 _pid,
+        bool _paused
+    ) external onlyRole(ADMIN_ROLE) {
         poolInfo[_pid].paused = _paused;
 
         emit SetPause(_pid, _paused);
     }
 
-    function rescueFunds(IERC20 token, uint256 amount) external onlyRole(ADMIN_ROLE) {
+    function rescueFunds(
+        IERC20 token,
+        uint256 amount
+    ) external onlyRole(ADMIN_ROLE) {
         token.safeTransfer(msg.sender, amount);
     }
 
     function rescueETH(uint256 amount) external onlyRole(ADMIN_ROLE) {
-        (bool suc,) = address(msg.sender).call{value: amount}("");
+        (bool suc, ) = address(msg.sender).call{value: amount}("");
         require(suc, "!eth-rescue");
     }
 
