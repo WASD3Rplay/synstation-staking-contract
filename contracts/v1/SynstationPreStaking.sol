@@ -65,7 +65,7 @@ contract SynstationPreStaking is AccessControlUpgradeable {
         return poolInfo.length;
     }
 
-    /// @notice Deposit LP tokens to MonoMaster for reward allocation.
+    /// @notice Deposit LP token
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param amount LP token amount to deposit.
     /// @param to The receiver of `amount` deposit benefit.
@@ -96,7 +96,7 @@ contract SynstationPreStaking is AccessControlUpgradeable {
         }
     }
 
-    /// @notice Withdraw LP tokens from MonoMaster.
+    /// @notice Withdraw LP token
     /// @param pid The index of the pool. See `poolInfo`.
     /// @param desiredAmount amount of shares to withdraw.
     /// @param to Receiver of the LP tokens.
