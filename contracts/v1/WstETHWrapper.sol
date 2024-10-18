@@ -31,6 +31,14 @@ contract WstETHWrapper is SynstationDepositWrapper {
         address _token,
         uint256 _amount
     ) internal override {
+        require(
+            _token == address(0) || _token == address(STETH),
+            "!invalid-token"
+        );
+        if (msg.value == 0) {
+            require(_token == address(STETH), "!invalid-token");
+        }
+
         if (_token == address(0)) {
             require(msg.value == _amount, "!value-mismatch");
 

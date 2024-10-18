@@ -71,7 +71,7 @@ const config = {
     },
     tenderly_mainnet: {
       chainId: 1,
-      url: 'https://rpc.tenderly.co/fork/3cdaf312-a3d4-4a62-81cd-fe12dce0b431',
+      url: 'https://rpc.tenderly.co/fork/3a7373b1-bd32-48bd-b82f-b4e57771f3a3',
       accounts: [DEPLOYER_PVT_KEY],
     },
     klaytn: {

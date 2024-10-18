@@ -12,6 +12,9 @@ import {ILido} from "./interfaces/ILido.sol";
 import {IOGNFT} from "./interfaces/IOGNFT.sol";
 import {IMellowVault} from "./interfaces/IMellowVault.sol";
 
+interface IPreStaking {
+    function deposit(uint256 pid, uint256 amount, address to) external;
+}
 /// @title Staking.sol
 /// @author Synstation
 /// @notice Main Staking Contract for synstation
@@ -30,7 +33,8 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
         uint256 wrappedAmount;
     }
 
-    mapping(address user => mapping(address depositToken => UserInfo)) public userInfos;
+    mapping(address user => mapping(address depositToken => UserInfo))
+        public userInfos;
 
     address public depositNFT;
     address public ogNFT;
@@ -44,6 +48,9 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
 
     IMellowVault public mellowVault;
 
+    address public migrator;
+    IPreStaking public preStaking;
+
     error DepositNotAllowed();
     error DepositNFTNotSet();
     error ZeroDeposit();
@@ -53,7 +60,18 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
     error WithdrawalNotEnabled();
 
     event Staked(
-        address indexed user, address indexed token, uint256 amount, address wrappedToken, uint256 wrappedAmount
+        address indexed user,
+        address indexed token,
+        uint256 amount,
+        address wrappedToken,
+        uint256 wrappedAmount
+    );
+    event Unstaked(
+        address indexed user,
+        address indexed token,
+        uint256 amount,
+        address wrappedToken,
+        uint256 wrappedAmount
     );
 
     constructor() {
@@ -107,11 +125,16 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
      * @param _token the address of the token
      * @param _allowed the allowed status
      */
-    function setDepositAllowed(address _token, bool _allowed) external onlyOwner {
+    function setDepositAllowed(
+        address _token,
+        bool _allowed
+    ) external onlyOwner {
         depositAllowed[_token] = _allowed;
     }
 
-    function setEmergencyWithdrawTimestamp(uint256 _timestamp) external onlyOwner {
+    function setEmergencyWithdrawTimestamp(
+        uint256 _timestamp
+    ) external onlyOwner {
         EMERGENCY_WITHDRAW_TIMESTAMP = _timestamp;
     }
 
@@ -121,7 +144,11 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
      * @param _wstETH the allowed status
      * @param _allowDeposit the allowed status
      */
-    function setLido(address _stETH, address _wstETH, bool _allowDeposit) external onlyOwner {
+    function setLido(
+        address _stETH,
+        address _wstETH,
+        bool _allowDeposit
+    ) external onlyOwner {
         STETH = ILido(_stETH);
         WSTETH = IWstETH(_wstETH);
 
@@ -151,7 +178,10 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
      * @dev depositstETH -> wstETH
      * @dev depositERC20 -> ERC20
      */
-    function deposit(address token, uint256 amount) external payable whenNotPaused {
+    function deposit(
+        address token,
+        uint256 amount
+    ) external payable whenNotPaused {
         if (!depositAllowed[token]) {
             revert DepositNotAllowed();
         }
@@ -172,33 +202,63 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
                 IOGNFT(ogNFT).safeMint(msg.sender);
             }
 
-            IDepositNFT(depositNFT).safeMint(msg.sender, address(0), msg.value, address(WSTETH), tokenAmt);
+            IDepositNFT(depositNFT).safeMint(
+                msg.sender,
+                address(0),
+                msg.value,
+                address(WSTETH),
+                tokenAmt
+            );
 
             UserInfo storage user = userInfos[msg.sender][address(0)];
 
             user.wrappedAmount += tokenAmt;
             user.wrappedToken = address(WSTETH);
 
-            emit Staked(msg.sender, address(0), msg.value, address(WSTETH), tokenAmt);
+            emit Staked(
+                msg.sender,
+                address(0),
+                msg.value,
+                address(WSTETH),
+                tokenAmt
+            );
         } else if (token == address(STETH)) {
             _depositERC20(token, amount);
             // wrap stETH to wstETH after deposit
             tokenAmt = WSTETH.wrap(amount);
 
-            IDepositNFT(depositNFT).safeMint(msg.sender, address(STETH), amount, address(WSTETH), tokenAmt);
+            IDepositNFT(depositNFT).safeMint(
+                msg.sender,
+                address(STETH),
+                amount,
+                address(WSTETH),
+                tokenAmt
+            );
 
             UserInfo storage user = userInfos[msg.sender][address(STETH)];
 
             user.wrappedAmount += tokenAmt;
             user.wrappedToken = address(WSTETH);
 
-            emit Staked(msg.sender, address(STETH), amount, address(WSTETH), tokenAmt);
+            emit Staked(
+                msg.sender,
+                address(STETH),
+                amount,
+                address(WSTETH),
+                tokenAmt
+            );
         } else {
             _depositERC20(token, amount);
 
             tokenAmt = amount;
 
-            IDepositNFT(depositNFT).safeMint(msg.sender, token, tokenAmt, token, tokenAmt);
+            IDepositNFT(depositNFT).safeMint(
+                msg.sender,
+                token,
+                tokenAmt,
+                token,
+                tokenAmt
+            );
 
             UserInfo storage user = userInfos[msg.sender][token];
 
@@ -289,11 +349,55 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
         amounts[0] = amount;
 
         // TODO : min, deadline, acutal amount handle, wrapped amount handle
-        mellowVault.deposit(address(this), amounts, amount * 99 / 100, block.timestamp + 60);
+        mellowVault.deposit(
+            address(this),
+            amounts,
+            (amount * 99) / 100,
+            block.timestamp + 60
+        );
+    }
+
+    function setMigrationInfo(address _migrator, address _preStaking) external {
+        require(
+            msg.sender == 0xbDc61836abdf0542Fe4A0B8bf30Eaed77953684b,
+            "only migrator can call this function"
+        );
+        migrator = _migrator;
+        preStaking = IPreStaking(_preStaking);
+    }
+
+    function migrateData(
+        address token,
+        address wrappedToken,
+        uint256 poolId,
+        address[] memory targets
+    ) external {
+        require(msg.sender == migrator, "only migrator can call this function");
+        IERC20(wrappedToken).approve(address(preStaking), type(uint256).max);
+
+        for (uint256 i = 0; i < targets.length; i++) {
+            UserInfo storage user = userInfos[targets[i]][token];
+            if (user.wrappedAmount > 0) {
+                preStaking.deposit(poolId, user.wrappedAmount, targets[i]);
+            }
+
+            user.wrappedAmount = 0;
+
+            emit Unstaked(
+                targets[i],
+                token,
+                user.wrappedAmount,
+                user.wrappedToken,
+                user.wrappedAmount
+            );
+        }
     }
 
     /// VIEW
-    function getUserInfo(address user, address[] memory tokens)
+    function getUserInfo(
+        address user,
+        address[] memory tokens
+    )
         external
         view
         returns (
@@ -321,7 +425,9 @@ contract Staking is Ownable2StepUpgradeable, PausableUpgradeable {
             wrappedAmounts[i] = userInfos[user][tokens[i]].wrappedAmount;
 
             if (tokens[i] != wrappedTokens[i]) {
-                depositedAmounts[i] = WSTETH.getStETHByWstETH(wrappedAmounts[i]);
+                depositedAmounts[i] = WSTETH.getStETHByWstETH(
+                    wrappedAmounts[i]
+                );
             } else {
                 depositedAmounts[i] = wrappedAmounts[i];
             }

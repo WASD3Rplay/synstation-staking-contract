@@ -27,9 +27,11 @@ task('deploy-pre-staking', 'Deploy Pre Staking').setAction(async (taskArgs, hre)
   });
 });
 const wstETH = '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0';
-const karakUSDT = '0xA92b60b8eFE9ac06ED65980A6d43e3f488a7f7bb';
 const rstETH = '0x7a4EffD87C2f3C55CA251080b1343b605f327E3a'; // mellow
 const weETH = '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee'; // wrapped eEth
+const usdt = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+const usdc = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+const wbtc = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 task('add-pool', 'Add Pool')
   .addParam('token', 'new token address')
   .setAction(async (taskArgs, hre) => {

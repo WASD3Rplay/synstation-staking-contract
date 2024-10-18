@@ -7,3 +7,5 @@ import './deploy-mock-erc20';
 
 import './deploy-pre-staking';
 import './deploy-wrapper';
+
+import './deploy-legacy';
