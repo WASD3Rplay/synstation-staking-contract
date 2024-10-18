@@ -35,9 +35,6 @@ contract WstETHWrapper is SynstationDepositWrapper {
             _token == address(0) || _token == address(STETH),
             "!invalid-token"
         );
-        if (msg.value == 0) {
-            require(_token == address(STETH), "!invalid-token");
-        }
 
         if (_token == address(0)) {
             require(msg.value == _amount, "!value-mismatch");
@@ -47,6 +44,8 @@ contract WstETHWrapper is SynstationDepositWrapper {
         }
 
         if (_token == address(STETH)) {
+            require(msg.value == 0, "!value-mismatch");
+
             IERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
             _stEthToWstEth(_amount);
         }
