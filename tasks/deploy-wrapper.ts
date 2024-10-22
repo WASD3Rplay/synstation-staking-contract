@@ -24,3 +24,28 @@ task('deploy-wst-wrapper', 'Deploy wstWrapper')
       args: [preStaking.address, pid, wstETH, stETH, wstETH],
     });
   });
+
+const wastr = '0xaeaaf0e2c81af264101b9129c00f4440ccf0f720';
+
+task('deploy-wastr-wrapper', 'Deploy wstWrapper')
+  .addParam('pid', 'pid')
+  .setAction(async (taskArgs, hre) => {
+    const {
+      ethers,
+      getNamedAccounts,
+      deployments: { deploy, get },
+    } = hre;
+
+    const { pid } = taskArgs;
+
+    const { deployer } = await getNamedAccounts();
+
+    const preStaking = await hre.deployments.get('PreStaking');
+
+    await deploy('WAstarWrapper', {
+      from: deployer,
+      log: true,
+      contract: 'WAstarWrapper',
+      args: [preStaking.address, pid, wastr, wastr],
+    });
+  });

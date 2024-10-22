@@ -47,6 +47,16 @@ const config = {
         },
       },
     },
+    astar: {
+      chainId: 592,
+      url: 'https://evm.astar.network	',
+      accounts: [DEPLOYER_PVT_KEY],
+      verify: {
+        etherscan: {
+          apiKey: ETHERSCAN_API_KEY,
+        },
+      },
+    },
     sepolia: {
       chainId: 11155111,
       url: 'https://rpc.sepolia.org',

@@ -73,7 +73,7 @@ task('migrate-info', 'upgrade Deploy legacy Staking').setAction(async (taskArgs,
   const wst = '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0';
   const st = '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84';
   const dc = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'; // pid 4
-  // const tx = await staking.migrateData(ZeroAddress, wst, 0, migrationData.eth);
-  const tx = await staking.migrateData(st, wst, 0, migrationData.stETH);
+  const tx = await staking.migrateData(ZeroAddress, wst, 0, migrationData.eth);
+  // const tx = await staking.migrateData(st, wst, 0, migrationData.stETH);
   // const tx = await staking.migrateData(dc, dc, 4, migrationData.usdc);
 });
