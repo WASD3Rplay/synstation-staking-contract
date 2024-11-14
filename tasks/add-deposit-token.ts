@@ -24,3 +24,4 @@ task('add-deposit-token', 'Setup addresses for contracts')
 
     await tx.wait();
   });
+// 0xE511ED88575C57767BAfb72BfD10775413E3F2b0  // nastr

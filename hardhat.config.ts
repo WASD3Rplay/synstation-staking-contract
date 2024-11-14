@@ -1,20 +1,20 @@
-import './tasks';
-import '@nomicfoundation/hardhat-toolbox';
-import '@nomicfoundation/hardhat-ethers';
-import 'hardhat-deploy';
-import 'hardhat-deploy-ethers';
-import * as dotenv from 'dotenv';
-import 'hardhat-gas-reporter';
-import { ethers } from 'ethers';
+import "./tasks";
+import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-ethers";
+import "hardhat-deploy";
+import "hardhat-deploy-ethers";
+import * as dotenv from "dotenv";
+import "hardhat-gas-reporter";
+import { ethers } from "ethers";
 dotenv.config();
 
-const DEPLOYER_PVT_KEY = process.env.DEPLOYER_PVT_KEY || '';
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || '';
+const DEPLOYER_PVT_KEY = process.env.DEPLOYER_PVT_KEY || "";
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
 const config = {
   solidity: {
     compilers: [
       {
-        version: '0.8.19',
+        version: "0.8.19",
         settings: {
           optimizer: {
             enabled: true,
@@ -39,7 +39,7 @@ const config = {
     //   },
     mainnet: {
       chainId: 1,
-      url: 'https://eth.llamarpc.com',
+      url: "https://eth.llamarpc.com",
       accounts: [DEPLOYER_PVT_KEY],
       verify: {
         etherscan: {
@@ -49,7 +49,7 @@ const config = {
     },
     astar: {
       chainId: 592,
-      url: 'https://evm.astar.network	',
+      url: "https://evm.astar.network",
       accounts: [DEPLOYER_PVT_KEY],
       verify: {
         etherscan: {
@@ -59,42 +59,42 @@ const config = {
     },
     sepolia: {
       chainId: 11155111,
-      url: 'https://rpc.sepolia.org',
+      url: "https://rpc.sepolia.org",
       accounts: [DEPLOYER_PVT_KEY],
       verify: {
         etherscan: {
-          apiUrl: 'https://api-sepolia.etherscan.io',
+          apiUrl: "https://api-sepolia.etherscan.io",
           apiKey: ETHERSCAN_API_KEY,
         },
       },
     },
     holesky: {
       chainId: 17000,
-      url: 'https://rpc-holesky.rockx.com',
+      url: "https://rpc-holesky.rockx.com",
       accounts: [DEPLOYER_PVT_KEY],
       verify: {
         etherscan: {
-          apiUrl: 'https://api-holesky.etherscan.io',
+          apiUrl: "https://api-holesky.etherscan.io",
           apiKey: ETHERSCAN_API_KEY,
         },
       },
     },
     tenderly_mainnet: {
       chainId: 1,
-      url: 'https://rpc.tenderly.co/fork/3a7373b1-bd32-48bd-b82f-b4e57771f3a3',
+      url: "https://rpc.tenderly.co/fork/3a7373b1-bd32-48bd-b82f-b4e57771f3a3",
       accounts: [DEPLOYER_PVT_KEY],
     },
     klaytn: {
       chainId: 8217,
-      url: 'https://klaytn.blockpi.network/v1/rpc/public',
+      url: "https://klaytn.blockpi.network/v1/rpc/public",
       accounts: [DEPLOYER_PVT_KEY],
     },
   },
   paths: {
-    sources: './contracts',
-    tests: './test',
-    cache: './cache',
-    artifacts: './artifacts',
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts",
   },
 
   namedAccounts: {
@@ -104,7 +104,7 @@ const config = {
   },
 
   gasReporter: {
-    currency: 'USD',
+    currency: "USD",
     gasPrice: 4,
   },
 };
