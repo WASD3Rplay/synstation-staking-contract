@@ -158,6 +158,17 @@ contract SynstationPreStaking is AccessControlUpgradeable {
         emit SetPause(_pid, _paused);
     }
 
+    function updatePool(
+        uint256 _pid,
+        IERC20 _want
+    ) external onlyRole(ADMIN_ROLE) {
+        PoolInfo storage pool = poolInfo[_pid];
+        require(pool.totalDeposited == 0, "!pool-not-empty");
+        require(address(pool.want) != address(0), "!invalid-pool");
+
+        poolInfo[_pid].want = _want;
+    }
+
     function rescueFunds(
         IERC20 token,
         uint256 amount

@@ -34,6 +34,7 @@ const usdc = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const wbtc = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 const wastr = '0xaeaaf0e2c81af264101b9129c00f4440ccf0f720';
 const nastr = '0xE511ED88575C57767BAfb72BfD10775413E3F2b0';
+const aastr = '0xC7E92Cf2c4f5bA60E926D3dB25ad9aBfA063aBd9';
 task('add-pool', 'Add Pool')
   .addParam('token', 'new token address')
   .setAction(async (taskArgs, hre) => {
@@ -50,6 +51,27 @@ task('add-pool', 'Add Pool')
     const PreStaking = (await hre.ethers.getContract('PreStaking', deployer)) as SynstationPreStaking;
 
     const tx = await PreStaking.add(token, '0');
+
+    await tx.wait();
+  });
+
+task('update-pool', 'Add Pool')
+  .addParam('pid', 'pool id')
+  .addParam('token', 'new token address')
+  .setAction(async (taskArgs, hre) => {
+    const {
+      ethers,
+      getNamedAccounts,
+      deployments: { deploy, get },
+    } = hre;
+
+    const { token, pid } = taskArgs;
+
+    const { deployer } = await getNamedAccounts();
+    console.log('deployer', deployer);
+    const PreStaking = (await hre.ethers.getContract('PreStaking', deployer)) as SynstationPreStaking;
+
+    const tx = await PreStaking.updatePool(pid, token);
 
     await tx.wait();
   });
