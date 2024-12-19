@@ -169,18 +169,6 @@ contract SynstationPreStaking is AccessControlUpgradeable {
         poolInfo[_pid].want = _want;
     }
 
-    function rescueFunds(
-        IERC20 token,
-        uint256 amount
-    ) external onlyRole(ADMIN_ROLE) {
-        token.safeTransfer(msg.sender, amount);
-    }
-
-    function rescueETH(uint256 amount) external onlyRole(ADMIN_ROLE) {
-        (bool suc, ) = address(msg.sender).call{value: amount}("");
-        require(suc, "!eth-rescue");
-    }
-
     // Roles
     function grantListingRole(address _account) external {
         grantRole(LISTING_ROLE, _account);
